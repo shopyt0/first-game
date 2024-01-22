@@ -1,0 +1,167 @@
+"""
+Loops
+Student  Project
+Project       
+"""
+## importing stuff
+import tsapp
+import random
+import pygame
+## setting up the graphics window
+window = tsapp.GraphicsWindow()
+## vars
+time = tsapp.get_program_duration()
+score = 0
+highscore = 0
+timer = 0
+bpower = False
+## instructins
+print("you will be chased by a rock monster try to get as much tresure as you can")
+print("every 3 tresures unlocked the rock monster gets a temporary or permanent upgrade")
+## sprites
+bg = tsapp.Sprite("GreenFeltTable.jpg", 0 ,0)
+bad = tsapp.Sprite("BoulderRunSheet.png", 0 ,0)
+slime = tsapp.Sprite("SlimeGreen.png", 900 ,130)
+tres = tsapp.Sprite("TreasureChestTopAngle.png", 650 , 50)
+pro = tsapp.Sprite("RPSRockSmall.png", 0 ,0)
+berry = tsapp.Sprite("Blueberry.png",500,70)
+bluem = tsapp.Sprite("BlueMark.png",300,40)
+flame = tsapp.Sprite("Flame.png",0,0)
+
+## scale of sprites
+slime.scale = .4
+bad.scale = .6
+tres.scale = .2
+pro.scale = 3
+flame.scale = .5
+## adding sprites
+window.add_object(bg)
+window.add_object(bad)
+window.add_object(tres)
+window.add_object(slime)
+
+## rock guy ai 
+bad.x_speed = random.randint(300, 500)
+bad.y_speed = random.randint(150, 250)
+## centering sprites so they can be randomly placed
+bad.center_x = window.center_x
+bad.center_y = window.center_y
+pro.center_x = window.center_x
+pro.center_y = window.center_y
+
+    
+##main loop
+while window.is_running:
+    
+            
+    
+    ##points system 
+    if slime.is_colliding_rect(tres):
+        tres.center_x = random.randint(0,999)
+        score += 1
+        if score >= highscore:
+            highscore += 1
+        print("your current score is now " + str(score) + " and your highscore is " + str(highscore))
+    ## game over system
+    if slime.is_colliding_rect(bad) or slime.is_colliding_rect(pro):
+        score -= 1
+        if score >= 0:
+            print("you have " + str(score) +" score left")
+            bad.x = random.randint(0,999)
+            pro.x = random.randint(0,999)
+    if score < 0:
+        print("you died gg your highscore was " + str(highscore))
+        break
+    ## summons rock 20 times in random places once player gets 4 scores and if the player touches it thy lose a score
+    if score >= 4:
+        window.add_object(pro)
+        for i in range(20):
+            pro.x = random.randint(1,999)
+            pro.y = random.randint(1,999)
+    #hides rock if isnt doing anything
+    else:
+        pro.destroy()
+    ## allows you to get powers:
+    if highscore >= 1:
+        window.add_object(berry)
+        if slime.is_colliding_rect(berry):
+            berry.destroy()
+            bpower = True
+## shoots random colors and changes the bakc ground
+    if bpower == True and tsapp.is_key_down(tsapp.K_SPACE):
+        window.add_object(bluem)
+        blast = random.randint(1,4)
+        bluem.x = random.randint(1,999)
+        bluem.y = random.randint(1,999)
+        if blast == 1:
+            bluem.image = "RedMark.png"
+            bg.image = "ComicBackgroundExplosion.png"
+        if blast == 2:
+            bluem.image = "BlueMark.png"
+            bg.image = "ComicBackgroundDashing.png"
+        if blast == 3:
+            bluem.image = "PurpleMark.png"
+            bg.image = "ComicBackgroundEruption.png"
+        if blast == 4:
+            bluem.image = "GreenMark.png"
+            bg.image = "ComicBackgroundFlash.png"
+            
+    ## makes it so when the badguy touches your blue thing he is slowed and turned the opposite way
+    if bad.is_colliding_rect(bluem):
+        bad.x_speed *= -1
+        
+    ## next lvl
+    if highscore > 10:
+        window.add_object(flame)
+        flame.x_speed = 20
+        if slime.is_colliding_rect(flame):
+            score -= 3
+        if score >= 0:
+            print("you have " + str(score) +" score left")
+            flame.x = random.randint(0,999)
+            flame.y = random.randint(0,999)
+    ## hides it if it isnt doing anything
+    else:
+        flame.x_speed = 0
+        flame.destroy()
+
+
+    ##moving stuff for the slime char
+    if tsapp.is_key_down(tsapp.K_d):
+        slime.x_speed = 130
+        slime.flip_x = False
+        slime.image = "SlimeGreenHopSheet.png"
+    elif tsapp.is_key_down(tsapp.K_a):
+        slime.x_speed = -130
+        slime.flip_x = True
+        slime.image = "SlimeGreenHopSheet.png"
+    elif tsapp.is_key_down(tsapp.K_w):
+        slime.y_speed = -130    
+        slime.image = "SlimeGreenIdleSheet.png"
+    elif tsapp.is_key_down(tsapp.K_s):
+        slime.y_speed = 130
+        slime.image = "SlimeGreenIdleSheet.png"
+    else:
+        slime.x_speed = 0
+        slime.y_speed = 0
+        slime.image = "SlimeGreenIdleSheet.png"
+        
+    ## moving stuff for the rock guy
+    if bad.center_x <= 0 or bad.x > window.width - bad.width:
+        bad.x_speed = -bad.x_speed
+    if bad.x_speed < 0:
+        bad.flip_x = True
+    if bad.x_speed > 0:
+        bad.flip_x = False
+    if bad.center_y <= 0 or bad.y > window.height - bad.height:
+        bad.y_speed = -bad.y_speed
+        ## flame guy movement
+    if flame.center_x <= 0 or flame.x > window.width - flame.width:
+        flame.x_speed = -flame.x_speed
+    if flame.x_speed < 0:
+        flame.flip_x = True
+    if flame.x_speed > 0:
+        flame.flip_x = False
+    if flame.center_y <= 0 or flame.y > window.height - flame.height:
+        flame.y_speed = -flame.y_speed
+    window.finish_frame()
